@@ -1,11 +1,5 @@
 NULL = 
 
-AM_CPPFLAGS = \
-	$(XMPL_CFLAGS) \
-	-include $(CONFIG_HEADER) \
-	-I$(top_srcdir)/include \
-	$(NULL)
-
 AM_VALAFLAGS = \
 	--vapidir $(top_srcdir)/vapi \
 	--pkg config \
@@ -22,6 +16,7 @@ libxmpl_la_SOURCES = \
 	$(NULL)
 
 libxmpl_la_CFLAGS = \
+	-I../include \
 	`pkg-config --cflags --libs exempi-2.0` \
 	$(NULL)
 
@@ -37,6 +32,13 @@ bin_PROGRAMS = \
 
 xmpl_test_SOURCES = \
 	xmpl-test.vala \
+	$(NULL)
+
+xmpl_test_CFLAGS = \
+	-I../include \
+	`pkg-config --cflags --libs gobject-2.0` \
+	`pkg-config --cflags --libs exempi-2.0` \
+	-lxmpl \
 	$(NULL)
 
 EXTRA_DIST = \

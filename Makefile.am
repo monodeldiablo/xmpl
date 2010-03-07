@@ -9,8 +9,8 @@ SUBDIRS = \
 	po \
 	$(NULL)
 
-docdir = ${prefix}/doc/
-doc_DATA = \
+xmpldocdir = ${docdir}
+xmpldoc_DATA = \
 	ChangeLog \
 	README \
 	COPYING \
