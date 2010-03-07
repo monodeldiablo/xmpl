@@ -169,15 +169,12 @@ bool xmpl_delete_property (char* file, char* namespace, char* key)
 		f = xmp_files_open_new (file, XMP_OPEN_FORUPDATE | XMP_OPEN_ONLYXMP);
 		x = xmp_files_get_new_xmp (f);
 
-		if (xmp_has_property (x, namespace, key) && xmp_delete_property (x, namespace, key))
-		{
-			success = true;
-		}
+		success = xmp_has_property (x, namespace, key) && xmp_delete_property (x, namespace, key);
 
 		/* Flush the changes to disk. */
-		if (!xmp_files_close (f, XMP_CLOSE_SAFEUPDATE))
+		if (!xmp_files_put_xmp (f, x) || !xmp_files_close (f, XMP_CLOSE_SAFEUPDATE))
 		{
-			printf ("Error closing '%s': %d\n", file, xmp_get_error ());
+			printf ("Error writing to or closing '%s': %d\n", file, xmp_get_error ());
 			success = false;
 		}
 
