@@ -45,9 +45,10 @@ char* xmpl_get_property (char* file, char* namespace, char* key)
 				for (; xmp_get_array_item (x, namespace, key, i, s, NULL); i++)
 				{
 					/* Allocate enough space for both strings, plus one more character for the
-					   comma that will separate the array items. */
-					value = (char*) realloc (value,
-						(strlen (value) + 1 + strlen (xmp_string_cstr (s))) * sizeof (char));
+					   comma that will separate the array items, plus another for the
+					   terminating null character. */
+					int size = (strlen (value) + strlen (xmp_string_cstr (s)) + 2) * sizeof (char);
+					value = (char*) realloc (value, size);
 					value = strcat (value, ",");
 					value = strcat (value, xmp_string_cstr (s));
 				}
@@ -82,7 +83,7 @@ char* xmpl_get_property (char* file, char* namespace, char* key)
 					d.nanoSecond);
 
 				/* Glue it all together. */
-				value = (char*) realloc (value, (strlen (value) + strlen (tzinfo)) * sizeof (char));
+				value = (char*) realloc (value, (strlen (value) + strlen (tzinfo) + 1) * sizeof (char));
 				value = strcat (value, tzinfo);
 
 				free (tzinfo);
