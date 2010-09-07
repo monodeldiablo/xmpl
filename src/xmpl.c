@@ -12,6 +12,9 @@
 
 #include "xmpl.h"
 
+#define TIME_ZONE_LENGTH 7 /* length (plus terminator) of a time zone string */
+#define DATETIME_LENGTH 25 /* length (plus terminator) of a datetime string */
+
 char* xmpl_get_property (char* file, char* namespace, char* key)
 {
 	if (xmp_init ())
@@ -30,10 +33,39 @@ char* xmpl_get_property (char* file, char* namespace, char* key)
 		{
 			s = xmp_string_new ();
 
-			/* This property is a string. */
-			if (xmp_get_property (x, namespace, key, s, &p) && strcmp ("", xmp_string_cstr (s)) != 0)/* && XMP_IS_PROP_SIMPLE (p))*/
+			/* This property is a DateTime. */
+			if (xmp_get_property_date (x, namespace, key, &d, &p))
 			{
-				value = strdup (xmp_string_cstr (s));
+				char* tz_format = "-%02d:%02d";
+				char* time_format = "%02d-%02d-%02dT%02d:%02d:%02d.%04d";
+
+				/* Fill in the time zone information. */
+				char* tzinfo = (char*) malloc (TIME_ZONE_LENGTH * sizeof (char));
+				sprintf (tzinfo, tz_format, d.tzHour, d.tzMinute);
+
+				/* If this represents a timezone east of UTC, change the sign. */
+				if (d.tzSign > 0)
+				{
+					tzinfo[0] = '+';
+
+				}
+
+				/* Now fill in the actual time information. */
+				value = (char*) malloc (DATETIME_LENGTH * sizeof (char));
+				sprintf (value, time_format,
+					d.year,
+					d.month,
+					d.day,
+					d.hour,
+					d.minute,
+					d.second,
+					d.nanoSecond);
+
+				/* Glue it all together. */
+				value = (char*) realloc (value, (strlen (value) + strlen (tzinfo) + 1) * sizeof (char));
+				value = strcat (value, tzinfo);
+
+				free (tzinfo);
 			}
 
 			/* Nope... it's an array. */
@@ -54,39 +86,10 @@ char* xmpl_get_property (char* file, char* namespace, char* key)
 				}
 			}
 
-			/* This property is a DateTime. */
-			else if (xmp_get_property_date (x, namespace, key, &d, &p))
+			/* This property is a string. */
+			else if (xmp_get_property (x, namespace, key, s, &p) && strcmp ("", xmp_string_cstr (s)) != 0)/* && XMP_IS_PROP_SIMPLE (p))*/
 			{
-				char* tz_format = "-%02d:%02d";
-				char* time_format = "%02d-%02d-%02dT%02d:%02d:%02d.%04d";
-
-				/* Fill in the time zone information. */
-				char* tzinfo = (char*) malloc (strlen (tz_format) * sizeof (char));
-				sprintf (tzinfo, tz_format, d.tzHour, d.tzMinute);
-
-				/* If this represents a timezone east of UTC, change the sign. */
-				if (d.tzSign > 0)
-				{
-					tzinfo[0] = '+';
-
-				}
-
-				/* Now fill in the actual time information. */
-				value = (char*) malloc (sizeof (time_format));
-				sprintf (value, time_format,
-					d.year,
-					d.month,
-					d.day,
-					d.hour,
-					d.minute,
-					d.second,
-					d.nanoSecond);
-
-				/* Glue it all together. */
-				value = (char*) realloc (value, (strlen (value) + strlen (tzinfo) + 1) * sizeof (char));
-				value = strcat (value, tzinfo);
-
-				free (tzinfo);
+				value = strdup (xmp_string_cstr (s));
 			}
 
 			else
