@@ -1,4 +1,4 @@
-AC_INIT([xmpl: A Vala-friendly interface to Exempi], [0.1.0], [brian.william.davis@gmail.com], [xmpl], [http://github.com/monodeldiablo/xmpl])
+AC_INIT([xmpl: A Vala-friendly interface to Exempi], [0.2.0], [brian.william.davis@gmail.com], [xmpl], [http://github.com/monodeldiablo/xmpl])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE([dist-bzip2])
@@ -43,6 +43,7 @@ AC_CONFIG_FILES([Makefile
 	include/Makefile
 	src/Makefile
 	data/Makefile
+	vapi/Makefile
 	po/Makefile.in])
 
 AC_OUTPUT

@@ -4,6 +4,7 @@ NULL =
 
 SUBDIRS = \
 	include \
+	vapi \
 	data \
 	src \
 	po \

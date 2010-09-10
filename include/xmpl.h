@@ -50,18 +50,18 @@ const char* XMPL_XAP_RIGHTS = NS_XAP_RIGHTS;
  * retrieve the property's value. This method will try to guess the type     *
  * and, if it is not a string, will attempt to coerce it into one, free of   *
  * charge.                                                                   */
-char* xmpl_get_property (char* file, char* namespace, char* key);
+char* xmpl_get_property (const char* file, const char* namespace, const char* key);
 
 /* Given a file, property name, and value, this will set the property to the *
  * supplied value. It assumes that all input is a string, and tries to set   *
  * the value to the proper type unless it's just not possible, in which case *
  * the method throws up its hands in frustration and resigns itself to       *
  * failure.                                                                  */
-bool xmpl_set_property (char* file, char* namespace, char* key, char* value);
+bool xmpl_set_property (const char* file, const char* namespace, const char* key, const char* value);
 
 /* And, to complete the trifecta, we have the wholesale carpetbombing        *
  * method, which, given a file and property name, wipes any and all mention  *
  * of that property's value(s) off the map. Boom. Goodbye. Make sure you're  *
  * not being rash before using this guy. He's not the type to ask            *
  * permission.                                                               */
-bool xmpl_delete_property (char* file, char* namespace, char* key);
+bool xmpl_delete_property (const char* file, const char* namespace, const char* key);

@@ -13,9 +13,9 @@
 #include "xmpl.h"
 
 #define TIME_ZONE_LENGTH 7 /* length (plus terminator) of a time zone string */
-#define DATETIME_LENGTH 25 /* length (plus terminator) of a datetime string */
+#define TIME_LENGTH 25 /* length (plus terminator) of a datetime string */
 
-char* xmpl_get_property (char* file, char* namespace, char* key)
+char* xmpl_get_property (const char* file, const char* namespace, const char* key)
 {
 	if (xmp_init ())
 	{
@@ -24,6 +24,8 @@ char* xmpl_get_property (char* file, char* namespace, char* key)
 		XmpStringPtr s;
 		XmpPropsBits p;
 		XmpDateTime d;
+
+		/* FIXME: This is an obvious buffer overflow waiting to happen. */
 		char* value = NULL;
 
 		f = xmp_files_open_new (file, XMP_OPEN_READ | XMP_OPEN_ONLYXMP);
@@ -37,22 +39,22 @@ char* xmpl_get_property (char* file, char* namespace, char* key)
 			if (xmp_get_property_date (x, namespace, key, &d, &p))
 			{
 				char* tz_format = "-%02d:%02d";
-				char* time_format = "%02d-%02d-%02dT%02d:%02d:%02d.%04d";
+				char* time_format = "%04d-%02d-%02dT%02d:%02d:%02d.%04d";
+
+				char tz[TIME_ZONE_LENGTH] = "";
+				char time[TIME_LENGTH] = "";
 
 				/* Fill in the time zone information. */
-				char* tzinfo = (char*) malloc (TIME_ZONE_LENGTH * sizeof (char));
-				sprintf (tzinfo, tz_format, d.tzHour, d.tzMinute);
+				sprintf (tz, tz_format, d.tzHour, d.tzMinute);
 
 				/* If this represents a timezone east of UTC, change the sign. */
 				if (d.tzSign > 0)
 				{
-					tzinfo[0] = '+';
-
+					tz[0] = '+';
 				}
 
 				/* Now fill in the actual time information. */
-				value = (char*) malloc (DATETIME_LENGTH * sizeof (char));
-				sprintf (value, time_format,
+				sprintf (time, time_format,
 					d.year,
 					d.month,
 					d.day,
@@ -62,10 +64,9 @@ char* xmpl_get_property (char* file, char* namespace, char* key)
 					d.nanoSecond);
 
 				/* Glue it all together. */
-				value = (char*) realloc (value, (strlen (value) + strlen (tzinfo) + 1) * sizeof (char));
-				value = strcat (value, tzinfo);
-
-				free (tzinfo);
+				value = (char*) malloc ((strlen (time) + strlen (tz) + 1) * sizeof (char));
+				value = strcpy (value, time);
+				value = strcat (value, tz);
 			}
 
 			/* Nope... it's an array. */
@@ -108,7 +109,7 @@ char* xmpl_get_property (char* file, char* namespace, char* key)
 	}
 }
 
-bool xmpl_set_property (char* file, char* namespace, char* key, char* value)
+bool xmpl_set_property (const char* file, const char* namespace, const char* key, const char* value)
 {
 	if (xmp_init ())
 	{
@@ -161,7 +162,7 @@ bool xmpl_set_property (char* file, char* namespace, char* key, char* value)
 	}
 }
 
-bool xmpl_delete_property (char* file, char* namespace, char* key)
+bool xmpl_delete_property (const char* file, const char* namespace, const char* key)
 {
 	if (xmp_init ())
 	{
